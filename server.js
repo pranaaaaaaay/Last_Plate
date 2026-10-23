@@ -215,9 +215,17 @@ app.use((err, _req, res, _next) => {
 });
 process.on('unhandledRejection', e => console.error('Unhandled rejection:', e?.message));
 export default app;
-if (!process.env.LASTPLATE_NO_LISTEN) { // tests import the app without opening a port
+if (!process.env.LASTPLATE_NO_LISTEN) {
   const port = process.env.PORT || 3000;
-  const server = app.listen(port, () => console.log(`LastPlate running at http://localhost:${port}  (${ai ? 'Gemini live' : 'Demo mode'})`));
-  const stop = () => server.close(() => process.exit(0)); // graceful shutdown for Cloud Run
-  process.on('SIGTERM', stop); process.on('SIGINT', stop);
+
+  const server = app.listen(port, "0.0.0.0", () => {
+    console.log(`LastPlate running on port ${port} (${ai ? "Gemini live" : "Demo mode"})`);
+  });
+
+  const stop = () => {
+    server.close(() => process.exit(0));
+  };
+
+  process.on("SIGTERM", stop);
+  process.on("SIGINT", stop);
 }
